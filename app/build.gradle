@@ -1,4 +1,6 @@
-apply plugin: 'com.android.application'
+plugins {
+    id 'com.android.application'
+}
 
 android {
     namespace 'com.kmac.ticketbuster'
@@ -17,8 +19,6 @@ android {
             minifyEnabled false
         }
         debug {
-            // Debug build is what the CI workflow produces — no signing
-            // config needed, Fire TV's Downloader app installs it directly.
         }
     }
 
