@@ -51,7 +51,7 @@ body{
   width:100%;
   max-width:1120px;
   aspect-ratio:16/10;
-  max-height:96vh;
+  max-height:92vh;
   background:linear-gradient(180deg,var(--bg-panel),var(--bg-panel-2));
   border:1px solid var(--line-dim);
   border-radius:14px;
@@ -305,6 +305,55 @@ svg.pathsvg{width:100%; height:100%; display:block;}
 .settings-row-title{ font-family:'Chakra Petch'; font-weight:700; font-size:14px; color:var(--text); }
 .settings-row-sub{ font-family:'JetBrains Mono'; font-size:10.5px; color:var(--text-faint); margin-top:3px; }
 
+.start-prompt-btn{
+  margin-top:2px; animation:prompt-pulse 1.8s ease-in-out infinite;
+}
+@keyframes prompt-pulse{
+  0%,100%{ box-shadow:0 0 24px var(--cisco-glow), inset 0 1px 0 rgba(255,255,255,0.3); }
+  50%{ box-shadow:0 0 40px var(--cisco-glow), inset 0 1px 0 rgba(255,255,255,0.3); }
+}
+
+.rule-row{ display:flex; gap:10px; width:100%; max-width:560px; }
+.rule-row .rule-box{ flex:1; max-width:none; }
+
+/* Fixed, non-scrolling Top 5 scoreboard — never grows past 5 cards
+   regardless of how many schools are in the data, so it stays
+   fully controller/TV friendly with no scroll interaction needed. */
+.top-schools-strip{
+  display:flex; gap:8px; justify-content:center; width:100%; max-width:620px; margin:2px 0;
+}
+.rivalry-empty{
+  font-family:'JetBrains Mono'; font-size:11.5px; color:var(--text-faint);
+  text-align:center; padding:14px 0; width:100%;
+}
+.school-card{
+  flex:1; max-width:116px; background:var(--bg-panel-2); border:1px solid var(--line-dim);
+  border-radius:10px; padding:8px 6px 10px; text-align:center;
+}
+.school-card.rank1{ border-color:#FFC72C; box-shadow:0 0 14px rgba(255,199,44,0.25); }
+.school-card .medal{ font-family:'JetBrains Mono'; font-size:13px; color:var(--text-faint); }
+.school-card .swatch-bar{ height:4px; border-radius:2px; margin:5px 0 6px; }
+.school-card .name{
+  font-family:'Chakra Petch'; font-weight:700; font-size:10px; color:var(--text);
+  line-height:1.2; min-height:24px; display:flex; align-items:center; justify-content:center;
+}
+.school-card .score{ font-family:'JetBrains Mono'; font-size:11.5px; color:var(--fixed); margin-top:3px; }
+
+.school-grid{
+  display:grid; grid-template-columns:repeat(2, 1fr); gap:8px;
+  width:100%; max-width:480px; max-height:240px; overflow-y:auto; padding:2px;
+}
+.school-chip{
+  display:flex; align-items:center; gap:10px; padding:9px 11px; border-radius:8px;
+  background:var(--bg-panel-2); border:2px solid var(--line-dim); cursor:pointer;
+  text-align:left; transition:border-color .15s, box-shadow .15s;
+}
+.school-chip .swatch{ width:9px; height:26px; border-radius:3px; flex-shrink:0; }
+.school-chip .label{ display:flex; flex-direction:column; gap:1px; min-width:0; }
+.school-chip .name{ font-family:'Chakra Petch'; font-weight:700; font-size:11.5px; color:var(--text); line-height:1.2; }
+.school-chip .mascot{ font-family:'JetBrains Mono'; font-size:8.5px; color:var(--text-faint); }
+.school-chip.selected{ border-color:#5EEBFF; box-shadow:0 0 12px rgba(94,235,255,0.5); }
+
 .final-score{font-family:'Chakra Petch'; font-weight:700; font-size:46px; color:var(--fixed); text-shadow:0 0 26px var(--fixed-glow);}
 .final-label{font-family:'JetBrains Mono'; font-size:10px; letter-spacing:0.16em; color:var(--text-faint); text-transform:uppercase; margin-top:-12px;}
 
@@ -429,35 +478,24 @@ svg.pathsvg{width:100%; height:100%; display:block;}
   <!-- START OVERLAY -->
   <div class="overlay" id="startOverlay">
     <button class="settings-gear" id="settingsGearBtn" title="Settings" aria-label="Settings">⚙</button>
-    <div id="pixelLogo" style="width:170px; margin-bottom:-4px;"></div>
-    <div class="brand-row"><span class="brand-mark">CISCO · THOUSANDEYES</span></div>
-    <div class="big-title">TICKET <span>BUSTER</span></div>
-    <div class="subtitle">Somewhere on campus, a connection is about to break. Trace the path across the network and find the failing hop before the user's patience runs out. Each shift throws 10–15 issues at you, and the network gets bigger and busier every level.</div>
+    <div id="pixelLogo" style="width:190px; margin-bottom:-10px;"></div>
+    <div class="big-title" style="font-size:30px; margin-top:-4px;">TICKET <span>BUSTER</span></div>
+    <div class="subtitle" style="max-width:460px;">Somewhere on campus, a connection is about to break. Trace the path and find the failing hop before the user's patience runs out.</div>
 
-    <div class="rule-box">
-      <div class="dot"></div>
-      <p>Only tap the node that's <b>pulsing RED</b>. That's the real fault — everything else on the path is healthy.</p>
-    </div>
-    <div class="rule-box amber">
-      <div class="dot"></div>
-      <p>Nodes pulsing <b>AMBER</b> are decoys. Tapping them costs you time — leave them alone.</p>
-    </div>
+    <div class="top-schools-strip" id="topSchoolsStrip"></div>
 
-    <div class="levels-preview">
-      <div class="level-chip"><b>L1</b> 🎮 Dorm · 4 hops</div>
-      <div class="level-chip"><b>L2</b> 🔬 Research · 7 hops</div>
-      <div class="level-chip"><b>L3</b> 🧑‍🏫 Faculty · 14 hops</div>
-      <div class="level-chip"><b>L4</b> 🏟️ Stadium · 20 hops</div>
-      <div class="level-chip"><b>L5</b> 📝 Exam · 30 hops</div>
+    <div class="rule-row">
+      <div class="rule-box">
+        <div class="dot"></div>
+        <p>Tap the node that's <b>pulsing RED</b>. That's the real fault.</p>
+      </div>
+      <div class="rule-box amber">
+        <div class="dot"></div>
+        <p>Nodes pulsing <b>AMBER</b> are decoys. Leave them alone.</p>
+      </div>
     </div>
 
-    <div class="controls-row">
-      <div class="control-item"><span class="key">🖱️</span> click a hop</div>
-      <div class="control-item"><span class="key">◀▶▲▼</span> move cursor</div>
-      <div class="control-item"><span class="key">Ⓐ</span> / <span class="key">Enter</span> select</div>
-    </div>
-
-    <button class="btn" id="startBtn">INSERT COIN — START</button>
+    <button class="btn start-prompt-btn" id="startBtn">🕹 PRESS ANY BUTTON TO START</button>
   </div>
 
   <!-- SETTINGS OVERLAY -->
@@ -467,10 +505,10 @@ svg.pathsvg{width:100%; height:100%; display:block;}
 
     <div class="settings-row">
       <div class="settings-row-text">
-        <div class="settings-row-title">High Score Leaderboard</div>
+        <div class="settings-row-title">School Rivalry Totals</div>
         <div class="settings-row-sub" id="settingsLbCount">Loading…</div>
       </div>
-      <button class="btn ghost danger" id="eraseScoresBtn">ERASE HIGH SCORES</button>
+      <button class="btn ghost danger" id="eraseScoresBtn">ERASE SCHOOL TOTALS</button>
     </div>
     <div class="hud-sub" id="eraseScoresNote" style="opacity:0.7; min-height:14px;"></div>
 
@@ -508,24 +546,19 @@ svg.pathsvg{width:100%; height:100%; display:block;}
     <div class="final-score" id="finalScore">0</div>
     <div class="subtitle" id="endSubtitle">Nice work keeping the network invisible.</div>
 
-    <div id="initialsEntry">
-      <div class="hud-sub" style="margin-bottom:6px;">ENTER YOUR INITIALS</div>
-      <div class="hud-sub" style="margin-bottom:10px; opacity:0.7;">▲▼ change letter · Ⓐ next letter, or submit on the third</div>
-      <div class="initials-row">
-        <div class="initial-box" id="ib0">A</div>
-        <div class="initial-box" id="ib1">A</div>
-        <div class="initial-box" id="ib2">A</div>
+    <div id="schoolPicker">
+      <div class="hud-sub" style="margin-bottom:10px;">WHICH SCHOOL ARE YOU REPPING?</div>
+      <div class="school-grid" id="schoolGrid"></div>
+      <div style="display:flex; gap:8px; margin-top:12px; justify-content:center;">
+        <button class="btn ghost" id="schoolSkipBtn">SKIP</button>
       </div>
-      <div style="display:flex; gap:8px; margin-top:10px; justify-content:center;">
-        <button class="btn ghost" id="skipBtn">SKIP</button>
-        <button class="btn" id="submitBtn">SUBMIT SCORE</button>
-      </div>
+      <div class="hud-sub" style="margin-top:8px; opacity:0.7;">◀▶▲▼ move · Ⓐ confirm pick</div>
     </div>
 
-    <div class="leaderboard" id="leaderboardBox" style="display:none;">
-      <div class="hud-sub" style="margin-bottom:6px; text-align:center;">TOP OPERATORS THIS SESSION</div>
-      <div id="lbRows"></div>
-      <div style="text-align:center; margin-top:14px;">
+    <div class="leaderboard" id="schoolConfirmBox" style="display:none;">
+      <div class="hud-sub" style="margin-bottom:10px; text-align:center;" id="schoolConfirmTitle">ADDED TO THE BOARD</div>
+      <div id="schoolConfirmText" style="text-align:center; font-family:'Chakra Petch'; font-weight:700; font-size:15px; color:var(--text); line-height:1.6; margin-bottom:14px;"></div>
+      <div style="text-align:center;">
         <button class="btn" id="againBtn">PLAY AGAIN</button>
       </div>
     </div>
@@ -774,31 +807,21 @@ svg.pathsvg{width:100%; height:100%; display:block;}
   function renderPixelLogo(elId){
     const el = document.getElementById(elId);
     if(!el) return;
-    const EYE = [
-      "........................","..........####..........",
-      ".......###....###.......",".....##..........##.....",
-      "....#....wwwwwwww...#...","...#...wwwCCCCCCww...#..",
-      "..#...wwCC0000CCww...#..","..#...wCC000##000CCw..#.",
-      "..#...wCC000##000CCw..#.","..#...wwCC0000CCww...#..",
-      "...#...wwwCCCCCCww...#..","....#....wwwwwwww...#...",
-      ".....##..........##.....","......###....###........",
-      "..........####..........",
-    ];
-    const PAL = { '#':'#049FD9','w':'#E9EDF3','C':'#5EEBFF','0':'#062733','.':null };
-    const cell = 8;
-    let rects = '';
-    for(let y=0;y<EYE.length;y++){
-      for(let x=0;x<EYE[y].length;x++){
-        const ch = EYE[y][x];
-        const c = PAL[ch];
-        if(!c || ch==='.') continue;
-        rects += `<rect x="${x*cell}" y="${y*cell}" width="${cell}" height="${cell}" fill="${c}"/>`;
-      }
+    const ORANGE = '#FB7D33';
+    const DARK = '#33525B';
+    function eyePath(cx, cy, halfW, halfH){
+      const x1 = cx-halfW, x2 = cx+halfW;
+      return `M${x1},${cy} Q${cx},${cy-halfH*1.9} ${x2},${cy} Q${cx},${cy+halfH*1.9} ${x1},${cy} Z`;
     }
-    const w = 24*cell, h = 15*cell;
-    el.innerHTML = `<svg viewBox="0 0 ${w} ${h+34}" width="100%" style="display:block; overflow:visible;">
-      <g style="filter:drop-shadow(0 0 6px rgba(94,235,255,0.6));">${rects}</g>
-      <text x="${w/2}" y="${h+26}" text-anchor="middle" font-family="'Chakra Petch',sans-serif" font-weight="700" font-size="17" letter-spacing="2" fill="#E9EDF3">THOUSAND<tspan fill="#5EEBFF">EYES</tspan></text>
+    const w = 280, h = 180;
+    const cx = w/2, cy = 78;
+    el.innerHTML = `<svg viewBox="0 0 ${w} ${h}" width="100%" style="display:block; overflow:visible;">
+      <g style="filter:drop-shadow(0 0 8px rgba(251,125,51,0.45));">
+        <path d="${eyePath(cx,cy,124,40)}" fill="none" stroke="${ORANGE}" stroke-width="15" stroke-linejoin="miter" stroke-miterlimit="2"/>
+        <path d="${eyePath(cx,cy,72,24)}" fill="none" stroke="${ORANGE}" stroke-width="11" stroke-linejoin="miter" stroke-miterlimit="2"/>
+        <circle cx="${cx}" cy="${cy-1}" r="16" fill="${DARK}"/>
+      </g>
+      <text x="${cx}" y="${h-14}" text-anchor="middle" font-family="'Chakra Petch',sans-serif" font-weight="700" font-size="19" letter-spacing="2" fill="#E9EDF3">THOUSAND<tspan fill="${ORANGE}">EYES</tspan></text>
     </svg>`;
   }
 
@@ -929,46 +952,82 @@ svg.pathsvg{width:100%; height:100%; display:block;}
   let sourceNodeIdx=0, destNodeIdx=0;
   let cursorNodeIdx=0;
   let padActive=true;
-  let initialsLetters=['A','A','A'], initialsActive=0, initialsBoxEls=[];
 
-  // ================= Persistent leaderboard (localStorage) =================
-  const LB_STORAGE_KEY = 'ticketBuster_leaderboard_v1';
+  // ================= Persistent school rivalry totals (localStorage) =================
+  const SCHOOL_STORAGE_KEY = 'ticketBuster_schoolTotals_v1';
   let storageAvailable = true;
 
-  function loadLeaderboard(){
+  // Editable roster: add, remove, rename, or recolor schools here.
+  // 'id' must stay unique and stable once scores exist for it (it's the
+  // storage key) — renaming 'name' later is fine, changing 'id' loses
+  // that school's accumulated total.
+  const SCHOOLS = [
+    { id:'app-state',        name:'Appalachian State',     mascot:'Mountaineers', color:'#FFC72C' },
+    { id:'ecu',              name:'East Carolina University', mascot:'Pirates',   color:'#592A8A' },
+    { id:'ecsu',             name:'Elizabeth City State',  mascot:'Vikings',      color:'#003DA5' },
+    { id:'fayetteville-state', name:'Fayetteville State',  mascot:'Broncos',      color:'#0033A0' },
+    { id:'nc-at',            name:'NC A&T State',          mascot:'Aggies',       color:'#00205B' },
+    { id:'nccu',             name:'NC Central',            mascot:'Eagles',       color:'#7A1E3A' },
+    { id:'nc-state',         name:'NC State',              mascot:'Wolfpack',     color:'#CC0000' },
+    { id:'unc-asheville',    name:'UNC Asheville',         mascot:'Bulldogs',     color:'#0057B8' },
+    { id:'unc-chapel-hill',  name:'UNC Chapel Hill',       mascot:'Tar Heels',    color:'#7BAFD4' },
+    { id:'unc-charlotte',    name:'UNC Charlotte',         mascot:'49ers',        color:'#046A38' },
+    { id:'unc-greensboro',   name:'UNC Greensboro',        mascot:'Spartans',     color:'#00254B' },
+    { id:'unc-pembroke',     name:'UNC Pembroke',          mascot:'Braves',       color:'#B8860B' },
+    { id:'unc-wilmington',   name:'UNC Wilmington',        mascot:'Seahawks',     color:'#00677F' },
+    { id:'wcu',              name:'Western Carolina',      mascot:'Catamounts',   color:'#6E3FA3' },
+    { id:'wssu',             name:'Winston-Salem State',   mascot:'Rams',         color:'#9E1B32' },
+    { id:'other',            name:'Other / Not Listed',    mascot:'',             color:'#6B7280' },
+  ];
+
+  function loadSchoolTotals(){
     try{
-      const raw = localStorage.getItem(LB_STORAGE_KEY);
+      const raw = localStorage.getItem(SCHOOL_STORAGE_KEY);
       if(raw){
         const parsed = JSON.parse(raw);
-        if(Array.isArray(parsed)) return parsed;
+        if(parsed && typeof parsed === 'object') return parsed;
       }
     } catch(err){
       storageAvailable = false;
       console.warn('Ticket Buster: localStorage unavailable, scores will not persist.', err);
     }
-    // First run (or storage unavailable): seed with demo scores so the board isn't empty.
-    return [
-      {name:'JLM', score:7200},
-      {name:'CIS', score:6150},
-      {name:'ARI', score:5400},
-    ];
+    return {}; // { schoolId: { total, plays } } — empty board on first run
   }
 
-  function saveLeaderboard(){
+  function saveSchoolTotals(){
     try{
-      localStorage.setItem(LB_STORAGE_KEY, JSON.stringify(leaderboard));
+      localStorage.setItem(SCHOOL_STORAGE_KEY, JSON.stringify(schoolTotals));
     } catch(err){
       storageAvailable = false;
-      console.warn('Ticket Buster: could not save leaderboard to localStorage.', err);
+      console.warn('Ticket Buster: could not save school totals to localStorage.', err);
     }
   }
 
-  function eraseLeaderboard(){
-    leaderboard = [];
-    saveLeaderboard();
+  function eraseSchoolTotals(){
+    schoolTotals = {};
+    saveSchoolTotals();
   }
 
-  let leaderboard = loadLeaderboard();
+  function addScoreToSchool(schoolId, points){
+    if(!schoolTotals[schoolId]) schoolTotals[schoolId] = { total:0, plays:0 };
+    schoolTotals[schoolId].total += points;
+    schoolTotals[schoolId].plays += 1;
+    saveSchoolTotals();
+  }
+
+  // Schools with at least one recorded play, ranked by total score descending.
+  function getRankedSchools(){
+    return SCHOOLS
+      .map(s => ({
+        ...s,
+        total: (schoolTotals[s.id] && schoolTotals[s.id].total) || 0,
+        plays: (schoolTotals[s.id] && schoolTotals[s.id].plays) || 0,
+      }))
+      .filter(s => s.plays > 0)
+      .sort((a,b)=> b.total - a.total);
+  }
+
+  let schoolTotals = loadSchoolTotals();
 
   const scoreVal=document.getElementById('scoreVal');
   const comboVal=document.getElementById('comboVal');
@@ -1408,78 +1467,115 @@ svg.pathsvg{width:100%; height:100%; display:block;}
       renderSceneInto('endScene', levelIdx, 'fail');
     }
     finalScore.textContent = score.toLocaleString();
-    document.getElementById('initialsEntry').style.display = '';
-    document.getElementById('leaderboardBox').style.display = 'none';
+    document.getElementById('schoolPicker').style.display = '';
+    document.getElementById('schoolConfirmBox').style.display = 'none';
     endOverlay.classList.remove('hidden');
-    setupInitials();
+    setupSchoolPicker();
   }
 
-  // ================= Initials entry =================
-  function isInitialsVisible(){
-    return !endOverlay.classList.contains('hidden') && document.getElementById('initialsEntry').style.display !== 'none';
+  // ================= University picker =================
+  const SCHOOL_GRID_COLS = 2;
+  let schoolPickerIdx = 0;
+
+  function isSchoolPickerVisible(){
+    return !endOverlay.classList.contains('hidden') && document.getElementById('schoolPicker').style.display !== 'none';
   }
 
-  function syncInitialsBoxVisual(){
-    initialsBoxEls.forEach((b,i)=>{
-      if(!b) return;
-      b.textContent = initialsLetters[i];
-      b.classList.toggle('selected', i===initialsActive);
+  function renderSchoolGrid(){
+    const grid = document.getElementById('schoolGrid');
+    grid.innerHTML = SCHOOLS.map((s,i)=> `
+      <div class="school-chip" data-idx="${i}">
+        <span class="swatch" style="background:${s.color}"></span>
+        <span class="label"><span class="name">${s.name}</span><span class="mascot">${s.mascot}</span></span>
+      </div>
+    `).join('');
+    grid.querySelectorAll('.school-chip').forEach(el=>{
+      el.addEventListener('click', ()=>{
+        schoolPickerIdx = parseInt(el.dataset.idx, 10);
+        confirmSchoolPick();
+      });
+    });
+    syncSchoolGridVisual();
+  }
+
+  function syncSchoolGridVisual(){
+    document.querySelectorAll('.school-chip').forEach((el,i)=>{
+      el.classList.toggle('selected', i===schoolPickerIdx);
     });
   }
 
-  function initialsCycleLetter(dir){
-    let code = initialsLetters[initialsActive].charCodeAt(0) + dir;
-    if(code>90) code=65; if(code<65) code=90;
-    initialsLetters[initialsActive] = String.fromCharCode(code);
-    syncInitialsBoxVisual();
+  function schoolPickerMove(dCol, dRow){
+    const n = SCHOOLS.length;
+    let col = schoolPickerIdx % SCHOOL_GRID_COLS;
+    let row = Math.floor(schoolPickerIdx / SCHOOL_GRID_COLS);
+    const maxRow = Math.floor((n-1) / SCHOOL_GRID_COLS);
+    if(dCol !== 0) col = Math.max(0, Math.min(SCHOOL_GRID_COLS-1, col+dCol));
+    if(dRow !== 0) row = Math.max(0, Math.min(maxRow, row+dRow));
+    let idx = row*SCHOOL_GRID_COLS + col;
+    if(idx >= n) idx = n-1;
+    schoolPickerIdx = idx;
+    syncSchoolGridVisual();
+    const el = document.querySelector(`.school-chip[data-idx="${schoolPickerIdx}"]`);
+    if(el) el.scrollIntoView({block:'nearest'});
   }
 
-  function initialsMoveActive(delta){
-    initialsActive = Math.max(0, Math.min(2, initialsActive+delta));
-    syncInitialsBoxVisual();
+  function confirmSchoolPick(){
+    const school = SCHOOLS[schoolPickerIdx];
+    addScoreToSchool(school.id, score);
+    const ranked = getRankedSchools();
+    const rank = ranked.findIndex(s=>s.id===school.id) + 1;
+    const total = (schoolTotals[school.id] && schoolTotals[school.id].total) || 0;
+    document.getElementById('schoolConfirmTitle').textContent = 'ADDED TO THE BOARD';
+    document.getElementById('schoolConfirmText').innerHTML =
+      `+${score.toLocaleString()} added to <b style="color:${school.color}">${school.name}</b>!<br>` +
+      `New total: ${total.toLocaleString()} <span style="color:var(--text-faint); font-weight:400;">(Rank #${rank})</span>`;
+    document.getElementById('schoolPicker').style.display = 'none';
+    document.getElementById('schoolConfirmBox').style.display = '';
   }
 
-  function submitInitials(){
-    leaderboard.push({name:initialsLetters.join(''), score});
-    leaderboard.sort((a,b)=>b.score-a.score);
-    leaderboard = leaderboard.slice(0,5);
-    saveLeaderboard();
-    showLeaderboard();
+  function skipSchoolPick(){
+    document.getElementById('schoolConfirmTitle').textContent = 'SCORE NOT SAVED';
+    document.getElementById('schoolConfirmText').textContent = 'No problem — your score wasn\'t added to the board.';
+    document.getElementById('schoolPicker').style.display = 'none';
+    document.getElementById('schoolConfirmBox').style.display = '';
   }
 
-  function setupInitials(){
-    initialsLetters = ['A','A','A'];
-    initialsActive = 0;
-    initialsBoxEls = [document.getElementById('ib0'),document.getElementById('ib1'),document.getElementById('ib2')];
-    initialsBoxEls.forEach((b,i)=>{
-      b.oncontextmenu = (e)=>e.preventDefault();
-      b.onclick = ()=>{ initialsActive=i; initialsCycleLetter(1); };
-    });
-    syncInitialsBoxVisual();
-
-    document.getElementById('submitBtn').onclick = submitInitials;
-    document.getElementById('skipBtn').onclick = showLeaderboard;
+  function setupSchoolPicker(){
+    schoolPickerIdx = 0;
+    renderSchoolGrid();
+    document.getElementById('schoolSkipBtn').onclick = skipSchoolPick;
   }
 
-  function showLeaderboard(){
-    document.getElementById('initialsEntry').style.display='none';
-    const box = document.getElementById('leaderboardBox');
-    box.style.display='';
-    const rows = document.getElementById('lbRows');
-    rows.innerHTML='';
-    leaderboard.forEach((row,i)=>{
-      const el = document.createElement('div');
-      el.className = 'lb-row' + (row.score===score ? ' me' : '');
-      el.innerHTML = `<span><span class="rank">#${i+1}</span>${row.name}</span><span>${row.score.toLocaleString()}</span>`;
-      rows.appendChild(el);
-    });
+  function renderTopSchoolsStrip(){
+    const el = document.getElementById('topSchoolsStrip');
+    const ranked = getRankedSchools().slice(0, 5); // fixed at 5 — never scrolls, never grows
+    if(ranked.length === 0){
+      el.innerHTML = '<div class="rivalry-empty">🏆 Be the first to put your school on the board!</div>';
+      return;
+    }
+    const medals = ['🥇','🥈','🥉'];
+    el.innerHTML = ranked.map((s,i)=> `
+      <div class="school-card ${i===0 ? 'rank1' : ''}">
+        <div class="medal">${medals[i] || '#'+(i+1)}</div>
+        <div class="swatch-bar" style="background:${s.color}"></div>
+        <div class="name">${s.name}</div>
+        <div class="score">${s.total.toLocaleString()}</div>
+      </div>
+    `).join('');
   }
 
-  document.getElementById('startBtn').addEventListener('click', beginSession);
-  document.getElementById('againBtn').addEventListener('click', ()=>{
+  function showStartScreen(){
     endOverlay.classList.add('hidden');
+    settingsOverlay.classList.add('hidden');
     startOverlay.classList.remove('hidden');
+    renderTopSchoolsStrip();
+  }
+
+  startOverlay.addEventListener('click', (e)=>{
+    if(e.target.closest('#settingsGearBtn')) return;
+    beginSession();
   });
+  document.getElementById('againBtn').addEventListener('click', showStartScreen);
 
   // ================= Settings menu =================
   const settingsOverlay = document.getElementById('settingsOverlay');
@@ -1489,10 +1585,10 @@ svg.pathsvg{width:100%; height:100%; display:block;}
 
   function refreshSettingsLbCount(){
     const countEl = document.getElementById('settingsLbCount');
-    const n = leaderboard.length;
-    countEl.textContent = n === 0
-      ? 'No scores saved yet.'
-      : `${n} score${n===1?'':'s'} saved · top score ${leaderboard[0].score.toLocaleString()}`;
+    const ranked = getRankedSchools();
+    countEl.textContent = ranked.length === 0
+      ? 'No scores recorded yet.'
+      : `${ranked.length} school${ranked.length===1?'':'s'} on the board · leader: ${ranked[0].name} (${ranked[0].total.toLocaleString()})`;
     if(!storageAvailable){
       countEl.textContent += ' (not persisting in this browser)';
     }
@@ -1500,7 +1596,7 @@ svg.pathsvg{width:100%; height:100%; display:block;}
 
   function resetEraseConfirm(){
     eraseArmed = false;
-    eraseScoresBtn.textContent = 'ERASE HIGH SCORES';
+    eraseScoresBtn.textContent = 'ERASE SCHOOL TOTALS';
     eraseScoresBtn.classList.remove('confirming');
     eraseScoresNote.textContent = '';
   }
@@ -1514,8 +1610,7 @@ svg.pathsvg{width:100%; height:100%; display:block;}
 
   document.getElementById('settingsBackBtn').addEventListener('click', ()=>{
     resetEraseConfirm();
-    settingsOverlay.classList.add('hidden');
-    startOverlay.classList.remove('hidden');
+    showStartScreen();
   });
 
   eraseScoresBtn.addEventListener('click', ()=>{
@@ -1525,15 +1620,16 @@ svg.pathsvg{width:100%; height:100%; display:block;}
       eraseScoresBtn.classList.add('confirming');
       eraseScoresNote.textContent = 'This cannot be undone.';
     } else {
-      eraseLeaderboard();
+      eraseSchoolTotals();
       resetEraseConfirm();
       refreshSettingsLbCount();
-      eraseScoresNote.textContent = 'High scores cleared.';
+      eraseScoresNote.textContent = 'School totals cleared.';
     }
   });
 
   // ================= Controller (Gamepad API) + keyboard nav =================
   let prevDir = {left:false,right:false,up:false,down:false,confirm:false};
+  let prevAnyStartPress = false;
 
   // Spatial nearest-neighbor navigation: pressing a direction jumps to the
   // closest clickable node that lies in that direction from the current one,
@@ -1569,26 +1665,23 @@ svg.pathsvg{width:100%; height:100%; display:block;}
     if(!briefOverlay.classList.contains('hidden')) return document.getElementById('briefContinueBtn');
     if(!levelCompleteOverlay.classList.contains('hidden')) return document.getElementById('lcContinueBtn');
     if(!endOverlay.classList.contains('hidden')){
-      const initialsVisible = document.getElementById('initialsEntry').style.display !== 'none';
-      if(!initialsVisible) return document.getElementById('againBtn');
+      if(!isSchoolPickerVisible()) return document.getElementById('againBtn');
       return null;
     }
     return null;
   }
 
   function handleDirection(dx, dy){
-    if(isInitialsVisible()){
-      if(dx !== 0) initialsMoveActive(dx);
-      if(dy !== 0) initialsCycleLetter(dy < 0 ? 1 : -1);
+    if(isSchoolPickerVisible()){
+      schoolPickerMove(dx, dy);
       return;
     }
     moveCursorDir(dx, dy);
   }
 
   function handleConfirm(){
-    if(isInitialsVisible()){
-      if(initialsActive < 2){ initialsMoveActive(1); }
-      else { submitInitials(); }
+    if(isSchoolPickerVisible()){
+      confirmSchoolPick();
       return;
     }
     const btn = getActiveOverlayButton();
@@ -1609,7 +1702,13 @@ svg.pathsvg{width:100%; height:100%; display:block;}
     }
   });
 
+  const NON_STARTING_KEYS = ['g','G','Shift','Control','Alt','Meta','CapsLock','Tab'];
   document.addEventListener('keydown', (e)=>{
+    if(!startOverlay.classList.contains('hidden')){
+      if(NON_STARTING_KEYS.includes(e.key)) return;
+      beginSession();
+      return;
+    }
     if(e.key==='ArrowLeft'){ handleDirection(-1,0); }
     else if(e.key==='ArrowRight'){ handleDirection(1,0); }
     else if(e.key==='ArrowUp'){ handleDirection(0,-1); }
@@ -1663,7 +1762,12 @@ svg.pathsvg{width:100%; height:100%; display:block;}
         }
       }
 
-      if(gp){
+      if(gp && !startOverlay.classList.contains('hidden')){
+        const anyPressed = gp.buttons.some(b=>b.pressed);
+        if(anyPressed && !prevAnyStartPress){ beginSession(); }
+        prevAnyStartPress = anyPressed;
+      } else if(gp){
+        prevAnyStartPress = false;
         const AXIS_T = 0.55;
         const dpadLeft = gp.buttons[14] && gp.buttons[14].pressed;
         const dpadRight = gp.buttons[15] && gp.buttons[15].pressed;
@@ -1709,6 +1813,7 @@ svg.pathsvg{width:100%; height:100%; display:block;}
   applyLevelHud(0);
   buildPath();
   renderPixelLogo('pixelLogo');
+  renderTopSchoolsStrip();
 })();
 </script>
 </body>
