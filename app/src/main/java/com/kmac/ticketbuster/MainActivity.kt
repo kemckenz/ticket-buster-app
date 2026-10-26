@@ -27,7 +27,8 @@ class MainActivity : AppCompatActivity() {
         settings.mediaPlaybackRequiresUserGesture = false
         settings.cacheMode = android.webkit.WebSettings.LOAD_NO_CACHE
         settings.setSupportZoom(false)
-
+        settings.useWideViewPort = true
+        settings.loadWithOverviewMode = true
         // Keep navigation inside the WebView (there's nothing to navigate to,
         // but this is a safe default for a kiosk-style app).
         webView.webViewClient = WebViewClient()
